@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Neuroverse — Brain Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080B12;--p1:#12161D;--p2:#1A1F28;--tx:#EDE9E1;--mu:#928E85;--vi:#E8A0A0;--cy:#7FB8A4;--co:#E0745C;--mi:#9CC5A1;--dv:#2A2E36;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:400 13.5px/1.5 Inter,system-ui,sans-serif;display:grid;grid-template-columns:232px 1fr 320px;grid-template-rows:72px 1fr 92px;grid-template-areas:"hd hd hd" "rl st pn" "tl tl tl";overflow:hidden;position:relative}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.03;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid var(--vi);outline-offset:2px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.h{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mu);font-weight:500}
+header{grid-area:hd;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--dv)}
+.brand{display:flex;gap:12px;align-items:center}
+.brand b{display:block;font:600 16px/1.1 'Space Grotesk';letter-spacing:1px}
+.brand small{font-size:9px;letter-spacing:1.6px;color:var(--mu)}
+#sess{text-align:center;font-size:11px;letter-spacing:1.4px}
+#sess .t{font-size:15px;letter-spacing:1px;display:block;margin-top:2px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mi);margin-right:6px;box-shadow:0 0 8px var(--mi)}
+.hr{display:flex;gap:14px;align-items:center}
+.ghost{border:1px solid var(--dv);border-radius:10px;padding:8px 14px;font-size:13px}
+.ghost:hover,.ic:hover,.card:hover,.row:hover,.pbtn:hover{background:rgba(255,255,255,.06)}
+.ic{width:34px;height:34px;border-radius:50%;border:1px solid var(--dv);display:grid;place-items:center;background:rgba(16,22,33,.8)}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--vi),var(--cy));position:relative}
+.av::after{content:"";position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:50%;background:var(--mi);border:2px solid var(--bg)}
+#rail{grid-area:rl;border-right:1px solid var(--dv);padding:20px 16px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+#modes{display:flex;flex-direction:column;background:var(--p1);border-radius:12px;padding:4px;gap:2px}
+.mode{text-align:left;padding:10px 14px;border-radius:9px;font-size:12px;letter-spacing:1.4px;color:var(--mu);position:relative}
+.mode[aria-selected=true]{background:var(--vi);color:#1A1409;font-weight:600}
+.mode[aria-selected=true]::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:#1A1409;border-radius:2px}
+.card{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid transparent;margin-bottom:6px}
+.card[aria-pressed=true]{background:rgba(232,160,160,.09);border-color:var(--dv)}
+.card .top{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:1.2px}
+.card .top span{margin-left:auto;font-family:'IBM Plex Mono';color:var(--mu)}
+.bar{height:3px;border-radius:3px;background:var(--dv);margin-top:8px;overflow:hidden}.bar i{display:block;height:100%}
+.row{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border-radius:9px;text-align:left}
+.row .m{width:8px;height:8px;border-radius:50%}
+.sw{margin-left:auto;width:30px;height:17px;border-radius:9px;background:var(--dv);position:relative;transition:background .2s}
+.sw::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s}
+.row[aria-checked=true] .sw{background:var(--vi)}.row[aria-checked=true] .sw::after{transform:translateX(13px)}
+#reset{margin-top:auto;color:var(--mu);font-size:12px;display:flex;gap:8px;align-items:center;padding:8px}
+#reset:hover{color:var(--tx)}
+#stage{background:radial-gradient(ellipse 60% 55% at 50% 46%,rgba(140,124,255,.14),transparent 70%),radial-gradient(ellipse 45% 25% at 50% 82%,rgba(85,217,232,.07),transparent 70%);grid-area:st;position:relative;overflow:hidden;min-height:360px}
+#cv{position:absolute;inset:0;touch-action:none;cursor:grab}
+#hero{position:absolute;left:24px;top:20px;max-width:260px;pointer-events:none;z-index:1}
+#hero h1{font:600 22px/1.18 'Space Grotesk';margin:0 0 6px;letter-spacing:-.3px}
+#hero p{margin:0;color:var(--mu);font-size:12.5px}@media(max-width:1500px){#hero p{display:none}}@media(max-width:1000px){#hero{max-width:200px}#hero h1{font-size:17px}}
+#hint{position:absolute;left:32px;bottom:22px;font-size:10px;letter-spacing:1.2px;color:var(--mu);line-height:1.8;pointer-events:none;opacity:.8}
+#vc{position:absolute;right:24px;top:24px;display:flex;flex-direction:column;gap:10px}
+#toast{position:absolute;left:50%;top:22px;transform:translate(-50%,-14px);background:var(--p2);border:1px solid var(--dv);border-radius:999px;padding:8px 18px;text-align:center;opacity:0;transition:.3s;pointer-events:none;z-index:3}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast b{display:block;font:500 10px 'IBM Plex Mono';letter-spacing:1.4px;color:var(--cy)}
+.sel{position:absolute;top:20px;display:none;transform:translateX(-50%);background:var(--p1);color:var(--tx);border:1px solid var(--dv);border-radius:10px;padding:7px 10px;font:12px Inter}
+#stage.cmp .sel{display:block}#stage.cmp #hero{display:none}
+#panel{grid-area:pn;border-left:1px solid var(--dv);padding:22px 24px;overflow:auto;display:flex;flex-direction:column;gap:18px}
+#rn{font:600 22px/1.15 'Space Grotesk';margin:4px 0}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font:500 10px 'IBM Plex Mono';letter-spacing:1.2px}
+#idx{font:500 34px/1 'IBM Plex Mono';margin:8px 0 4px}
+#chart{width:100%;height:96px;display:block;margin-top:8px}
+.mr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--dv)}.mr span:first-child{color:var(--mu)}
+.ins{background:var(--p1);border:1px solid var(--dv);border-radius:16px;padding:16px}
+.ins p{margin:8px 0}.lk{color:var(--vi);font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
+#why{display:none;color:var(--mu);font-size:12.5px}
+#pager{margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.pbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--dv);font-size:18px}
+#tl{grid-area:tl;border-top:1px solid var(--dv);display:flex;align-items:center;gap:24px;padding:0 24px;position:relative;background:var(--bg)}
+.pc{display:flex;gap:8px;align-items:center}
+.pc .ic{border-radius:10px;font:500 11px 'IBM Plex Mono'}
+#live[aria-pressed=true]{color:var(--mi);border-color:var(--mi)}
+#tlw{flex:1;min-width:0}
+#tlc{width:100%;height:52px;display:block;touch-action:none}
+#rng{display:flex;gap:4px;background:var(--p1);border-radius:10px;padding:3px}
+#rng button{padding:6px 10px;border-radius:8px;font:500 11px 'IBM Plex Mono';letter-spacing:1px;color:var(--mu)}
+#rng button[aria-pressed=true]{background:var(--p2);color:var(--tx);box-shadow:inset 0 0 0 1px var(--vi)}
+#tip{position:absolute;display:none;background:var(--p2);border:1px solid var(--dv);border-radius:8px;padding:4px 10px;font-size:11px;pointer-events:none;white-space:nowrap;z-index:4}
+@media(max-width:1000px){body{display:block;overflow:auto;height:auto}header{height:72px}#rail{border-right:0;border-bottom:1px solid var(--dv)}#stage{height:70vh}#panel{border-left:0}#tl{height:92px;position:sticky;bottom:0;gap:10px;padding:0 10px}.pc .ic:nth-child(n+1){width:30px;height:30px}#rng button{padding:5px 6px}#hero{max-width:240px}#hero h1{font-size:24px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header>
+<div class="brand"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8A0A0"/><stop offset="1" stop-color="#7FB8A4"/></linearGradient></defs><circle cx="13" cy="17" r="9" fill="none" stroke="url(#g)" stroke-width="2"/><circle cx="21" cy="17" r="9" fill="none" stroke="url(#g)" stroke-width="2"/><circle cx="17" cy="17" r="2.4" fill="url(#g)"/></svg><div><b>NEUROVERSE</b><small>BRAIN EXPLORER</small></div></div>
+<div id="sess"><span id="sst"><i class="dot"></i>LIVE SESSION</span><span class="t mono" id="clk">--:--:--</span></div>
+<div class="hr"><button class="ghost" id="share">Share session</button><button class="ic" id="help" aria-label="Help">?</button><div class="av" role="img" aria-label="Your profile, online"></div></div>
+</header>
+<nav id="rail" aria-label="Exploration">
+<div id="modes" role="tablist" aria-orientation="vertical"><button class="mode" role="tab" data-m="explore" aria-selected="true">EXPLORE</button><button class="mode" role="tab" data-m="signals" aria-selected="false">SIGNALS</button></div>
+<div class="h" style="margin-top:10px">Brain states</div><div id="states"></div>
+<div class="h" style="margin-top:6px">Visible layers</div><div id="layers"></div>
+<button id="reset"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4h-4"/></svg>Reset view</button>
+</nav>
+<main id="stage">
+<canvas id="cv" tabindex="0" aria-label="Interactive 3D brain. Drag to rotate, scroll to zoom, click a region to inspect."></canvas>
+<div id="hero"><h1>Explore the signals behind your attention.</h1><p>Navigate live neural patterns, inspect regional activity, and see how your brain shifts across states.</p></div>
+<div id="vc">
+<button class="ic" data-v="in" title="Zoom in" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4M8.5 11h5M11 8.5v5"/></svg></button>
+<button class="ic" data-v="out" title="Zoom out" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4M8.5 11h5"/></svg></button>
+<button class="ic" data-v="rot" title="Auto-rotate" aria-label="Toggle auto-rotate" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4h-4"/></svg></button>
+<button class="ic" data-v="ctr" title="Center on region" aria-label="Center on selected region"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg></button>
+</div>
+<div id="hint">DRAG TO ROTATE<br>SCROLL TO ZOOM<br>CLICK A REGION TO INSPECT</div>
+<div id="toast" role="status"><b>STATE CHANGED</b><span id="tmsg"></span></div>
+</main>
+<aside id="panel" aria-live="polite">
+<div><div class="h">Selected region</div><div id="rn">Prefrontal cortex</div><div id="rf" style="color:var(--mu)"></div><div style="margin-top:10px"><span class="pill" id="pill"></span></div></div>
+<div><div class="h">Activity index</div><div id="idx">78.4</div><div class="mono" id="dl" style="font-size:12px"></div></div>
+<div><div class="h">Signal intensity · last 60 sec</div><canvas id="chart"></canvas></div>
+<div id="mets"><div class="mr"><span>Connectivity</span><b class="mono" id="m1"></b></div><div class="mr"><span>Response latency</span><b class="mono" id="m2"></b></div><div class="mr"><span>Signal clarity</span><b class="mono" id="m3"></b></div><div class="mr" style="border:0"><span>Confidence</span><b class="mono" id="m4"></b></div></div>
+<div id="pager"><button class="pbtn" id="pv" aria-label="Previous region">‹</button><span class="mono" id="pg"></span><button class="pbtn" id="nx" aria-label="Next region">›</button></div>
+</aside>
+<footer id="tl">
+<div id="tlw"><div class="h" style="font-size:10px;margin-bottom:2px">Session timeline</div><canvas id="tlc" aria-label="Session timeline scrubber"></canvas></div>
+<div id="rng"><button data-r="10" aria-pressed="false">10 SEC</button><button data-r="30" aria-pressed="false">30 SEC</button><button data-r="60" aria-pressed="true">60 SEC</button></div>
+<div id="tip"></div>
+</footer>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const C={vi:'#8C7CFF',cy:'#55D9E8',co:'#FF806F',mi:'#7DE5BF'};
+const rgba=(h,a)=>`rgba(${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)},${a})`;
+const U={vi:'#E8A0A0',cy:'#7FB8A4',co:'#E0745C',mi:'#9CC5A1'};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+let seed=7;const rand=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const ST=['focus','memory','rest','stress'];
+const SD={
+focus:{n:'Focus',col:C.vi,pct:72,toast:'Viewing attention-related activity',ins:'Your attention network is showing sustained activation with low signal noise. This pattern is commonly associated with focused, task-oriented activity.',why:'Prefrontal and parietal regions are moving together while limbic signals stay quiet. Sustained, low-noise coordination like this is often described alongside concentration.'},
+memory:{n:'Memory',col:C.cy,pct:58,toast:'Viewing memory-related activity',ins:'Recall-related regions are leading this session, with short bursts of coordinated activity. This pattern is commonly associated with retrieving or rehearsing information.',why:'The hippocampus and temporal cortex rise first, then hand off to the prefrontal cortex. That sequence is often described during recall.'},
+rest:{n:'Rest',col:C.mi,pct:34,toast:'Viewing rest-related activity',ins:'Activity is low and evenly spread, with slow rhythms across most regions. This pattern is commonly associated with relaxed, unfocused attention.',why:'No single region dominates and variation between readings is small. Quiet, even activity like this is often described during rest.'},
+stress:{n:'Stress',col:C.co,pct:21,toast:'Viewing stress-related activity',ins:'Emotional-signal regions are elevated, with faster and noisier readings. This pattern is commonly associated with heightened alertness or pressure.',why:'The amygdala, insula and cingulate cortex are leading while signal noise rises. That mix is often described during tense or high-pressure moments.'}};
+const R=[
+{n:'Motor cortex',f:'Movement · coordination · action planning',p:[.35,.55,.2],v:[40,25,18,45]},
+{n:'Parietal cortex',f:'Spatial awareness · sensory integration',p:[.4,.5,-.35],v:[66,40,22,48]},
+{n:'Prefrontal cortex',f:'Executive function · attention · decision making',p:[.3,.4,.8],v:[78,52,24,58],tag:'ATTENTION NETWORK'},
+{n:'Orbitofrontal cortex',f:'Reward · judgement · impulse control',p:[.25,-.05,.8],v:[52,38,30,62]},
+{n:'Temporal cortex',f:'Language · hearing · meaning',p:[.7,-.15,.1],v:[44,70,26,40]},
+{n:'Occipital cortex',f:'Vision · pattern recognition',p:[.3,.1,-.9],v:[50,34,28,36]},
+{n:'Hippocampus',f:'Memory formation · spatial recall',p:[.4,-.2,-.1],v:[40,86,30,44],tag:'MEMORY RECALL'},
+{n:'Amygdala',f:'Emotional salience · threat detection',p:[.35,-.25,.25],v:[20,34,16,84],tag:'EMOTIONAL SIGNAL'},
+{n:'Thalamus',f:'Sensory relay · alertness',p:[.1,0,0],v:[58,48,40,60]},
+{n:'Cingulate cortex',f:'Error monitoring · emotion regulation',p:[.08,.35,.2],v:[62,44,30,66]},
+{n:'Insula',f:'Body awareness · interoception',p:[.55,0,.3],v:[34,40,36,70]},
+{n:'Cerebellum',f:'Balance · timing · fine coordination',p:[.25,-.45,-.7],v:[30,26,22,34]}];
+const PAIRS=[[2,0],[0,1],[1,5],[2,9],[9,8],[8,6],[6,7],[7,3],[3,2],[4,6],[10,7],[11,5],[8,2]];
+// geometry
+const surf=(x,y,z)=>{const f=1+.07*Math.sin(x*9+z*5)*Math.cos(y*7+z*4)+.04*Math.sin(z*14+y*6);let X=x*.8*f,Y=y*.6*f,Z=z*f;if(Y<0)Y*=.55;if(Y>.1)X+=Math.sign(X)*.05*Math.exp(-Math.abs(X)*9);return[X,Y,Z]};
+const pts=[],PN=[];
+for(let i=0;i<1500;i++){const u=rand()*2-1,t=rand()*6.283,s=Math.sqrt(1-u*u),x=s*Math.cos(t),z=s*Math.sin(t);pts.push(surf(x,u,z));PN.push([x,u,z])}
+for(let i=0;i<170;i++){const u=rand()*2-1,t=rand()*6.283,s=Math.sqrt(1-u*u),x=s*Math.cos(t),z=s*Math.sin(t);pts.push([x*.35,-.42+u*.17+.015*Math.sin(u*40),-.72+z*.22]);PN.push([x,u,z])}
+for(let i=0;i<110;i++){const y=-.4-rand()*.55,t=rand()*6.283,r=.13*(1+(y+.4)*.5);pts.push([Math.cos(t)*r,y,-.12+Math.sin(t)*r]);PN.push([Math.cos(t),0,Math.sin(t)])}
+const PR=[],PW=[];pts.forEach(p=>{let b=0,bd=9;R.forEach((r,i)=>{const d=Math.hypot(p[0]-r.p[0],p[1]-r.p[1],p[2]-r.p[2]);if(d<bd){bd=d;b=i}});PR.push(b);PW.push(Math.max(0,1-bd/.5))});
+const curves=[];
+for(let k=0;k<13;k++){const c=[];for(let i=0;i<=72;i++){const t=i/72*6.283,y=clamp(-.8+k*.13+.06*Math.sin(t*7+k*1.7),-.98,.98),r=Math.sqrt(1-y*y);c.push(surf(r*Math.cos(t),y,r*Math.sin(t)))}curves.push(c)}
+for(let m=0;m<12;m++){const c=[];for(let j=0;j<=48;j++){const u=-1+2*j/48,s=Math.sqrt(1-u*u),t=m/12*6.283+.09*Math.sin(u*10+m);c.push(surf(s*Math.cos(t),u,s*Math.sin(t)))}curves.push(c)}
+const RG=[{r:1.45,ax:.5,az:.2,s:.35,c:C.vi},{r:1.7,ax:-.7,az:.6,s:-.25,c:C.cy},{r:1.25,ax:1.1,az:-.4,s:.5,c:C.mi}];
+const rp=()=>{for(;;){const p=[(rand()*2-1)*.8,(rand()*2-1)*.55,(rand()*2-1)];if(p[0]*p[0]/.5+p[1]*p[1]/.3+p[2]*p[2]<.6)return p}};
+const fil=[];for(let i=0;i<110;i++){const a=rp(),b=rp();fil.push({a,b,c:[(a[0]+b[0])*.3,(a[1]+b[1])*.3,(a[2]+b[2])*.3]})}
+const pth=PAIRS.map(([i,j])=>{const a=R[i].p,b=R[j].p;return{i,j,a,b,c:[(a[0]+b[0])*.3,(a[1]+b[1])*.3+.1,(a[2]+b[2])*.3]}});
+const parts=Array.from({length:40},()=>({a:rand()*6.283,r:1.2+rand()*.45,s:.1+rand()*.25,ph:rand()*6.283}));
+// state
+let state=0,sel=2,mode='explore',hover=-1,auto=false,playing=true,live=true,pos=1,rng=60,tickN=240,n1=0,n2=0;
+const L={cortex:1,limbic:1,paths:1,field:1};
+const cam={yaw:-.75,pitch:.2,zoom:1},tgt={...cam};
+const actCur=R.map(r=>r.v[0]),savedAct=R.map(r=>r.v[2]);let savedS=2;
+const cv=$('#cv'),ctx=cv.getContext('2d');let W=0,H=0,DPR=1,TR={};
+function size(c,h){const w=c.clientWidth;c.width=w*DPR;c.height=h*DPR;c.getContext('2d').setTransform(DPR,0,0,DPR,0,0);return w}
+function resize(){DPR=Math.min(2,devicePixelRatio||1);const r=$('#stage').getBoundingClientRect();W=r.width;H=r.height;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';drawChart();drawTL()}
+new ResizeObserver(resize).observe($('#stage'));new ResizeObserver(()=>{drawChart();drawTL()}).observe($('#panel'));
+const P=(p,v)=>{const X=p[0]*TR.cy+p[2]*TR.sy,Z=-p[0]*TR.sy+p[2]*TR.cy;const Y2=p[1]*TR.cp-Z*TR.sp,Z2=p[1]*TR.sp+Z*TR.cp;const k=1/(1-Z2*.16);return[v.cx+X*v.sc*k,v.cy-Y2*v.sc*k,Z2]};
+const bez=(f,s)=>{const u=1-s;return[0,1,2].map(k=>u*u*f.a[k]+2*u*s*f.c[k]+s*s*f.b[k])};
+function vps(){if(mode==='compare'){const sc=Math.min(W*.15,H*.3)*cam.zoom;return[{cx:W*.25,cy:H*.54,sc,act:actCur},{cx:W*.75,cy:H*.54,sc,act:savedAct}]}return[{cx:W/2,cy:H*.54,sc:Math.min(W*.26,H*.33)*cam.zoom,act:actCur,main:1}]}
+const hue=val=>val>=62?C.co:val>=36?C.cy:(state===2?C.mi:C.vi);
+const Rn=n=>{const X=n[0]*TR.cy+n[2]*TR.sy,Z=-n[0]*TR.sy+n[2]*TR.cy;return[X,n[1]*TR.cp-Z*TR.sp,n[1]*TR.sp+Z*TR.cp]};
+function ringPt(g,a){const x=Math.cos(g.r?a:0)*g.r,z=Math.sin(a)*g.r;const y1=-z*Math.sin(g.ax),z1=z*Math.cos(g.ax);return[x*Math.cos(g.az)-y1*Math.sin(g.az),x*Math.sin(g.az)+y1*Math.cos(g.az),z1]}
+function rings(v,t,front){RG.forEach(g=>{ctx.lineWidth=front?1.3:1;ctx.strokeStyle=rgba(g.c,front?.4:.14);ctx.beginPath();let pen=false;for(let i=0;i<=72;i++){const q=P(ringPt(g,i/72*6.283),v);if((q[2]>=0)===front){pen?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);pen=true}else pen=false}ctx.stroke();const q=P(ringPt(g,t*g.s),v);if((q[2]>=0)===front){ctx.fillStyle=rgba(g.c,.18);ctx.beginPath();ctx.arc(q[0],q[1],10,0,7);ctx.fill();ctx.fillStyle=g.c;ctx.beginPath();ctx.arc(q[0],q[1],front?3.2:2,0,7);ctx.fill()}})}
+function drawBrain(v,t){
+const {cx,cy,sc,act}=v,col=SD[ST[state]].col,sig=mode==='signals';
+ctx.lineWidth=1;ctx.strokeStyle='rgba(133,145,165,.09)';
+const fq=P([0,-1.05,0],v);ctx.save();ctx.translate(fq[0],fq[1]);ctx.scale(1,.28);let sg=ctx.createRadialGradient(0,0,0,0,0,sc*1.15);sg.addColorStop(0,'rgba(0,0,0,.55)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(0,0,sc*1.15,0,7);ctx.fill();ctx.restore();
+[1.1,1.5,1.9].forEach(k=>{ctx.beginPath();for(let i=0;i<=64;i++){const a=i/64*6.283,q=P([Math.cos(a)*k,-1.05,Math.sin(a)*k],v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke()});
+ctx.beginPath();for(let i=0;i<16;i++){const a=i/16*6.283,p=P([Math.cos(a)*.6,-1.05,Math.sin(a)*.6],v),q=P([Math.cos(a)*1.9,-1.05,Math.sin(a)*1.9],v);ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1])}ctx.stroke();
+rings(v,t,false);
+let g=ctx.createRadialGradient(cx,cy,sc*.1,cx,cy,sc*1.05);g.addColorStop(0,rgba(col,.11));g.addColorStop(1,rgba(col,0));ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,cy,sc*1.05,sc*.8,0,0,7);ctx.fill();
+if(L.paths){const am=sig?2:1;ctx.lineWidth=1;fil.forEach(f=>{ctx.strokeStyle=rgba(col,.07*am);ctx.beginPath();for(let i=0;i<=10;i++){const q=P(bez(f,i/10),v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke()});
+pth.forEach((f,k)=>{const e=(act[f.i]+act[f.j])/200;ctx.strokeStyle=rgba(C.cy,(.1+e*.35)*(sig?1.5:1));ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=14;i++){const q=P(bez(f,i/14),v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke();const q=P(bez(f,(t*.18+k*.37)%1),v);ctx.fillStyle=rgba('#ffffff',.5+e*.4);ctx.beginPath();ctx.arc(q[0],q[1],1.8,0,7);ctx.fill()})}
+if(L.cortex){const FB=[[],[],[],[]];curves.forEach(c=>{let p=P(c[0],v);for(let i=1;i<c.length;i++){const q=P(c[i],v);FB[clamp(Math.floor(((p[2]+q[2])/2+1)/2*4),0,3)].push(p[0],p[1],q[0],q[1]);p=q}});
+FB.forEach((a,k)=>{ctx.strokeStyle=rgba(col,.05+k*.07);ctx.lineWidth=.8;ctx.beginPath();for(let i=0;i<a.length;i+=4){ctx.moveTo(a[i],a[i+1]);ctx.lineTo(a[i+2],a[i+3])}ctx.stroke()});
+const B=Array.from({length:18},()=>[]);
+for(let i=0;i<pts.length;i++){const q=P(pts[i],v),n=Rn(PN[i]);let lum=.18+Math.max(0,-.35*n[0]+.55*n[1]+.75*n[2])*.55+Math.pow(1-Math.abs(n[2]),2.2)*.5;if(n[2]<0)lum*=.45;const w=PW[i],a=act[PR[i]];let cl=0;if(w>.4){if(PR[i]===sel)cl=2;else if(a>=62)cl=1;lum+=w*a/100*.25}B[cl*6+clamp(Math.floor(lum*6),0,5)].push(q[0],q[1],1+(q[2]+1.1)/2.2*1.5+(cl?.5:0))}
+B.forEach((a,k)=>{const cl=Math.floor(k/6),lv=k%6;ctx.fillStyle=cl===2?`rgba(255,255,255,${.4+lv*.1})`:cl===1?rgba(C.co,.35+lv*.1):lv>=4?rgba('#E6EBFF',.35+lv*.1):rgba(col,.22+lv*.13);ctx.beginPath();for(let i=0;i<a.length;i+=3){const z=a[i+2];ctx.rect(a[i]-z/2,a[i+1]-z/2,z,z)}ctx.fill()})}
+ctx.fillStyle=rgba(C.cy,.6);parts.forEach(p=>{const a=p.a+t*p.s,q=P([Math.cos(a)*p.r,.25*Math.sin(a*2+p.ph),Math.sin(a)*p.r],v);ctx.globalAlpha=clamp((q[2]+1.6)/3,.1,.8);ctx.fillRect(q[0],q[1],1.6,1.6)});ctx.globalAlpha=1;
+const Q=R.map(r=>P(r.p,v));
+if(L.field){ctx.globalCompositeOperation='lighter';R.forEach((r,i)=>{const q=Q[i],val=act[i],a=(i===sel?1:.4)*(q[2]>-.3?1:.35)*(sig?1.3:1);const rad=sc*(.09+val/100*.17)*(1+.07*Math.sin(t*1.5+i*1.3));const h=hue(val);g=ctx.createRadialGradient(q[0],q[1],0,q[0],q[1],rad);g.addColorStop(0,rgba(h,.6*a*(.35+val/100)));g.addColorStop(1,rgba(h,0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(q[0],q[1],rad,0,7);ctx.fill();
+if(i===sel){g=ctx.createRadialGradient(q[0],q[1],0,q[0],q[1],rad*.4);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(q[0],q[1],rad*.4,0,7);ctx.fill()}});ctx.globalCompositeOperation='source-over'}
+ctx.globalCompositeOperation='lighter';for(let i=0;i<46;i++){const q=P(fil[i].a,v),a=clamp((q[2]+1)/2,.15,1)*(.55+.45*Math.sin(t*2+i));ctx.fillStyle=rgba(i%3?C.cy:C.vi,.14*a);ctx.beginPath();ctx.arc(q[0],q[1],7,0,7);ctx.fill();ctx.fillStyle=rgba('#ffffff',.8*a);ctx.beginPath();ctx.arc(q[0],q[1],1.6+q[2],0,7);ctx.fill()}ctx.globalCompositeOperation='source-over';
+R.forEach((r,i)=>{const q=Q[i],vis=q[2]>-.3?1:.3;if(L.limbic&&i>=6&&i<=10){ctx.fillStyle=rgba(C.mi,.85*vis);ctx.beginPath();ctx.arc(q[0],q[1],2.6,0,7);ctx.fill()}
+ctx.strokeStyle=`rgba(255,255,255,${(i===sel?.9:.3)*vis})`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(q[0],q[1],i===sel?7:4,0,7);ctx.stroke();
+if(mode==='compare'){const d=actCur[i]-savedAct[i];if(Math.abs(d)>=18){ctx.strokeStyle=d>0?C.co:C.mi;ctx.lineWidth=2;ctx.beginPath();ctx.arc(q[0],q[1],sc*.13,0,7);ctx.stroke()}}});
+rings(v,t,true);
+if(v.main&&mode==='explore'&&W>=760){const list=[2,6,7];if(!list.includes(sel))list.push(sel);const slots=[[24,.3,1],[W-24,.5,-1],[24,.7,1],[W-24,.28,-1]];
+list.forEach((i,k)=>{const r=R[i],val=act[i],s=slots[k],q=Q[i],on=i===sel;const tag=r.tag||r.f.split(' · ')[0].toUpperCase();const stat=val>=60?'+'+Math.round(val-60)+'% ACTIVITY':val>=35?'STABLE':'LOW';
+ctx.font='600 11px Inter';ctx.letterSpacing='1px';const w=Math.max(ctx.measureText(r.n.toUpperCase()).width,ctx.measureText(tag).width,ctx.measureText(stat).width)+10;
+const y=H*s[1],ex=s[0]+s[2]*w;ctx.globalAlpha=(on?1:.6)*(q[2]>-.3?1:.5);ctx.strokeStyle='rgba(244,247,251,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(q[0],q[1]);ctx.lineTo(ex,y+6);ctx.stroke();ctx.fillStyle='#F4F7FB';ctx.beginPath();ctx.arc(ex,y+6,2,0,7);ctx.fill();
+ctx.textAlign=s[2]>0?'left':'right';ctx.fillStyle='#F4F7FB';ctx.font='600 11px Inter';ctx.fillText(r.n.toUpperCase(),s[0],y);ctx.fillStyle='#8591A5';ctx.font='500 10px Inter';ctx.fillText(tag,s[0],y+15);ctx.fillStyle=val>=60?C.co:val>=35?C.mi:'#8591A5';ctx.font='500 12px "IBM Plex Mono"';ctx.fillText(stat,s[0],y+32);ctx.globalAlpha=1});ctx.textAlign='left';ctx.letterSpacing='0px'}
+return Q}
+let lastQ=[];
+function draw(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);const tt=RM?0:t;lastQ=vps().map(v=>({v,q:drawBrain(v,tt)}));
+if(mode==='compare'){ctx.strokeStyle='#263142';ctx.beginPath();ctx.moveTo(W/2,70);ctx.lineTo(W/2,H-50);ctx.stroke();ctx.fillStyle='#8591A5';ctx.font='11px Inter';ctx.textAlign='center';ctx.fillText('Rings mark regions that differ by 18+ points: coral is higher now, mint is lower now.',W/2,H-24);ctx.textAlign='left'}
+if(mode!=='compare'){const ox=W-58,oy=H-58;ctx.font='500 10px \"IBM Plex Mono\"';[[1,0,0,'X',C.co],[0,1,0,'Y',C.mi],[0,0,1,'Z',C.cy]].forEach(a=>{const r=Rn(a);ctx.strokeStyle=rgba(a[4],.8);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+r[0]*24,oy-r[1]*24);ctx.stroke();ctx.fillStyle=rgba(a[4],.9);ctx.fillText(a[3],ox+r[0]*31-3,oy-r[1]*31+3)})}
+if(hover>=0){const o=lastQ[0];const q=(mode==='compare'?lastQ[hv]:o).q[hover];const nm=R[hover].n;ctx.font='500 12px Inter';const w=ctx.measureText(nm).width+20;ctx.fillStyle='rgba(21,29,42,.95)';ctx.beginPath();ctx.roundRect(q[0]+12,q[1]-34,w,24,12);ctx.fill();ctx.fillStyle='#F4F7FB';ctx.fillText(nm,q[0]+22,q[1]-18)}}
+let hv=0;
+function hit(x,y){let best=-1,bd=18;lastQ.forEach((o,k)=>o.q.forEach((q,i)=>{const d=Math.hypot(q[0]-x,q[1]-y);if(d<bd&&q[2]>-.35){bd=d;best=i;hv=k}}));return best}
+function frame(ms){const t=ms/1000;TR={cy:Math.cos(cam.yaw),sy:Math.sin(cam.yaw),cp:Math.cos(cam.pitch),sp:Math.sin(cam.pitch)};
+if(auto)tgt.yaw+=.003;const e=RM?1:.09;cam.yaw+=(tgt.yaw-cam.yaw)*e;cam.pitch+=(tgt.pitch-cam.pitch)*e;cam.zoom+=(tgt.zoom-cam.zoom)*e;
+R.forEach((r,i)=>{actCur[i]+=(r.v[state]-actCur[i])*.05;savedAct[i]+=(r.v[savedS]-savedAct[i])*.05});draw(t);requestAnimationFrame(frame)}
+// camera interaction
+let dn=null;
+cv.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY,m:0};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(dn){const dx=e.clientX-dn.x,dy=e.clientY-dn.y;dn.m+=Math.abs(dx)+Math.abs(dy);tgt.yaw+=dx*.008;tgt.pitch=clamp(tgt.pitch+dy*.006,-.6,.8);dn.x=e.clientX;dn.y=e.clientY}else{hover=hit(x,y);cv.style.cursor=hover>=0?'pointer':'grab'}});
+cv.addEventListener('pointerup',e=>{const r=cv.getBoundingClientRect();if(dn&&dn.m<5){const i=hit(e.clientX-r.left,e.clientY-r.top);if(i>=0)select(i)}dn=null;cv.style.cursor='grab'});
+cv.addEventListener('pointerleave',()=>{hover=-1});
+cv.addEventListener('wheel',e=>{e.preventDefault();tgt.zoom=clamp(tgt.zoom*Math.exp(-e.deltaY*.001),.7,2.4)},{passive:false});
+cv.addEventListener('keydown',e=>{if(e.key==='ArrowRight')select((sel+1)%12);if(e.key==='ArrowLeft')select((sel+11)%12)});
+function focusRegion(i){const p=R[i].p,phi=Math.atan2(-p[0],p[2])*.85;let d=((phi-tgt.yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;tgt.yaw+=d;tgt.pitch=clamp(.2-p[1]*.25,-.1,.5);tgt.zoom=Math.max(tgt.zoom,1.2)}
+function select(i){sel=i;focusRegion(i);buf=mkBuf();upd()}
+// panel
+const num=(el,v)=>$(el).textContent=v;
+let buf=[];const mkBuf=()=>{const v=R[sel].v[state];let n=0;return Array.from({length:120},()=>{n=n*.8+(Math.random()-.5)*3;return v+n*1.8})};
+buf=mkBuf();let idxNow=78.4;
+function upd(){const r=R[sel],v=r.v[state];num('#rn',r.n);num('#rf',r.f);const p=$('#pill');const a=v>=60?['ACTIVE',U.vi]:v>=35?['STEADY',U.cy]:['QUIET',U.mi];p.textContent=a[0];p.style.background=rgba(a[1],.18);p.style.color=a[1];
+num('#pg',String(sel+1).padStart(2,'0')+' / 12');metrics();drawChart()}
+function metrics(){const v=R[sel].v[state];idxNow=v+.4+n1;num('#idx',idxNow.toFixed(1));const d=(idxNow-69.5)/69.5*100;const el=$('#dl');el.textContent=(d>=0?'+':'')+d.toFixed(1)+'% from baseline';el.style.color=d>=0?U.co:U.mi;
+num('#m1',Math.round(clamp(v*.6+38+n1,0,99))+'%');num('#m2',Math.round(252-1.4*v-n1*2)+' ms');num('#m3',v>=60?'High':v>=35?'Medium':'Low');num('#m4',Math.round(clamp(80+v*.2,0,99))+'%')}
+const ch=$('#chart');
+function drawChart(){const w=size(ch,96),c=ch.getContext('2d'),h=96;c.clearRect(0,0,w,h);const mn=Math.min(...buf),mx=Math.max(...buf),rg=Math.max(mx-mn,8),m=(mx+mn)/2;const X=i=>i/(buf.length-1)*w,Y=v=>h/2-(v-m)/rg*(h-24);
+c.strokeStyle='rgba(133,145,165,.1)';[.25,.5,.75].forEach(k=>{c.beginPath();c.moveTo(0,h*k);c.lineTo(w,h*k);c.stroke()});
+c.beginPath();buf.forEach((v,i)=>i?c.lineTo(X(i),Y(v)):c.moveTo(X(i),Y(v)));c.lineTo(w,h);c.lineTo(0,h);c.closePath();const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(232,160,160,.35)');g.addColorStop(1,'rgba(232,160,160,0)');c.fillStyle=g;c.fill();
+c.beginPath();buf.forEach((v,i)=>i?c.lineTo(X(i),Y(v)):c.moveTo(X(i),Y(v)));c.strokeStyle=U.cy;c.lineWidth=1.4;c.stroke();c.fillStyle='#fff';c.beginPath();c.arc(w-3,Y(buf[buf.length-1]),3.5,0,7);c.fill()}
+// timeline
+const tc=$('#tlc');let tl=[],evs=[];const EVN=['Attention peak','Signal dip','Task switch','Calm window'];
+const mean=()=>actCur.reduce((a,b)=>a+b,0)/12;
+for(let i=0;i<240;i++){n2=n2*.7+(Math.random()-.5)*10;tl.push(55+n2+5*Math.sin(i*.5))}
+[40,100,155,210].forEach((k,i)=>evs.push({k,l:EVN[i]}));
+function drawTL(){const w=size(tc,52),c=tc.getContext('2d'),h=52;c.clearRect(0,0,w,h);const x0=(1-rng/60)*w;c.fillStyle='rgba(232,160,160,.16)';c.fillRect(x0,0,w-x0,h);c.fillStyle=U.vi;c.fillRect(x0,h-2,w-x0,2);
+c.beginPath();tl.forEach((v,i)=>{const x=i/239*w,y=h-8-clamp(v,0,100)/100*(h-18);i?c.lineTo(x,y):c.moveTo(x,y)});c.strokeStyle=U.cy;c.lineWidth=1.3;c.stroke();
+evs.forEach(e=>{const x=(e.k-(tickN-239))/239*w;if(x<0)return;c.fillStyle=U.mi;c.beginPath();c.moveTo(x,3);c.lineTo(x+4,8);c.lineTo(x,13);c.lineTo(x-4,8);c.fill()});
+const cx=pos*w;c.strokeStyle='#fff';c.lineWidth=1.5;c.beginPath();c.moveTo(cx,0);c.lineTo(cx,h);c.stroke();c.fillStyle='#fff';c.beginPath();c.arc(clamp(cx,3,w-3),h-3,3,0,7);c.fill()}
+const fmt=ms=>new Date(ms).toLocaleTimeString('en-GB');
+function tick(){if(!playing)return;n1=n1*.8+(Math.random()-.5)*3;n2=n2*.7+(Math.random()-.5)*10;tickN++;tl.push(mean()+n2+5*Math.sin(tickN*.5));tl.shift();
+if(tickN%2===0){buf.push(R[sel].v[state]+n1*1.8);buf.shift();metrics();drawChart()}
+if(Math.random()<.02)evs.push({k:tickN,l:EVN[Math.floor(Math.random()*4)]});evs=evs.filter(e=>e.k>tickN-240);drawTL()}
+setInterval(tick,250);setInterval(()=>num('#clk',fmt(Date.now())),500);
+tc.addEventListener('pointermove',e=>{const r=tc.getBoundingClientRect(),x=e.clientX-r.left,tip=$('#tip');const ev=evs.find(v=>Math.abs((v.k-(tickN-239))/239*r.width-x)<8);if(ev){tip.style.display='block';tip.textContent=ev.l+' · '+fmt(Date.now()-(tickN-ev.k)*250);tip.style.left=clamp(e.clientX-60,8,innerWidth-200)+'px';tip.style.top=(tc.getBoundingClientRect().top-34-$('#tl').getBoundingClientRect().top)+'px'}else tip.style.display='none'});
+tc.addEventListener('pointerleave',()=>$('#tip').style.display='none');
+$$('#rng button').forEach(b=>b.onclick=()=>{rng=+b.dataset.r;$$('#rng button').forEach(x=>x.setAttribute('aria-pressed',x===b));drawTL()});
+// rail
+const wave=k=>{let s='';for(let i=0;i<=20;i++){const x=i*1.1,y=k==0?6+3*Math.sin(i*.9):k==1?(i%7<2?3:8)+Math.sin(i):k==2?6+2*Math.sin(i*.3):6+(i%2?4:-4)*(1+(i%3)*.3)*.7;s+=x+','+y+' '}return`<svg width="24" height="12" viewBox="0 0 23 12" fill="none" stroke-width="1.5"><polyline points="${s}" stroke="currentColor"/></svg>`};
+const sd=$('#states');ST.forEach((k,i)=>{const d=SD[k],b=document.createElement('button');b.className='card';b.setAttribute('aria-pressed',i===0);b.innerHTML=`<div class="top"><span style="color:${d.col};display:flex;margin:0">${wave(i)}</span>${d.n.toUpperCase()}<span>${d.pct}%</span></div><div class="bar"><i style="width:${d.pct}%;background:${d.col}"></i></div>`;b.onclick=()=>{if(state===i)return;state=i;$$('.card').forEach(x=>x.setAttribute('aria-pressed',x===b));buf=mkBuf();upd();toast(d.toast)};sd.appendChild(b)});
+const lyr=$('#layers');[['cortex','Cortex',C.vi],['limbic','Limbic system',C.mi],['paths','Neural pathways',C.cy],['field','Activity field',C.co]].forEach(([k,n,c])=>{const b=document.createElement('button');b.className='row';b.setAttribute('role','switch');b.setAttribute('aria-checked',true);b.innerHTML=`<i class="m" style="background:${c}"></i>${n}<i class="sw"></i>`;b.onclick=()=>{L[k]=!L[k];b.setAttribute('aria-checked',!!L[k])};lyr.appendChild(b)});
+$$('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.m;$$('.mode').forEach(x=>x.setAttribute('aria-selected',x===b));$('#stage').classList.toggle('cmp',mode==='compare')});
+$('#reset').onclick=()=>{Object.assign(tgt,{yaw:-.75,pitch:.2,zoom:1});auto=false;$('[data-v=rot]').setAttribute('aria-pressed',false)};
+$$('[data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.v;if(k==='in')tgt.zoom=clamp(tgt.zoom*1.2,.7,2.4);if(k==='out')tgt.zoom=clamp(tgt.zoom/1.2,.7,2.4);if(k==='rot'){auto=!auto;b.setAttribute('aria-pressed',auto)}if(k==='ctr')focusRegion(sel)});
+$('#pv').onclick=()=>select((sel+11)%12);$('#nx').onclick=()=>select((sel+1)%12);
+let tt;function toast(m,h='STATE CHANGED'){$('#toast b').textContent=h;$('#tmsg').textContent=m;$('#toast').classList.add('on');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('on'),2400)}
+$('#help').onclick=()=>toast('Drag to rotate, scroll to zoom, click a region to inspect.','HOW TO EXPLORE');
+$('#share').onclick=()=>toast('Sharing is not connected in this preview.','SHARE SESSION');
+resize();upd();drawTL();requestAnimationFrame(frame);
+})();
+</script></body></html>
