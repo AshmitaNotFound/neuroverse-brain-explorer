@@ -1,60 +1,44 @@
-# Neuroverse — Brain Explorer
+# Neuroverse: Brain Explorer
 
-A single-page, dark-mode interface for exploring a stylized 3D brain. Select regions, switch between brain states, and read simulated signal data. Everything is drawn procedurally on an HTML canvas: no 3D library, no external models or images.
+Neuroverse is an interactive brain-activity dashboard concept. Explore a 3D brain, switch between activity states, inspect regions, and scrub through a session timeline.
 
-> **Note:** all readings are simulated for demonstration. Nothing here is medical data or a medical conclusion.
+**Live demo:** [ashmitanotfound.github.io/neuroverse-brain-explorer](https://ashmitanotfound.github.io/neuroverse-brain-explorer/)
 
-## Features
+## What you can explore
 
-- **Interactive 3D brain** with lit cortex points, a ridge-line wireframe, glowing neural filaments, orbit rings, a floor grid and an X/Y/Z axis marker
-- **12 selectable regions** (prefrontal cortex, hippocampus, amygdala, and more). Click a hotspot or use the pager. The camera eases to the region and the side panel updates
-- **Four brain states:** Focus, Memory, Rest, Stress. Each moves the activity clusters, retints the brain and updates the chart
-- **Layer toggles:** cortex, limbic system, neural pathways, activity field
-- **Modes:** Explore (labels on) and Signals (stronger pathways and field)
-- **Insight panel:** activity index, 60-second signal chart, connectivity, latency, clarity and confidence
-- **Live timeline** with event markers and 10 / 30 / 60 second range
-- **Camera controls:** drag to rotate, scroll to zoom, plus zoom, auto-rotate and center buttons
-- Keyboard-accessible controls and `prefers-reduced-motion` support
+- **Brain states:** Focus, Memory, Rest, and Stress.
+- **Anatomical layers:** Toggle the cortex, limbic system, neural pathways, and activity field.
+- **Region inspection:** Select a brain region to view its name, a short functional description, and its displayed activity summary.
+- **3D navigation:** Drag to rotate, scroll to zoom, reset the view, center on the selected region, or toggle auto-rotation.
+- **Signal timeline:** Review the session trace and choose a 10-, 30-, or 60-second window.
+- **Session controls:** The interface includes a live-session indicator and a share-session control.
 
-## Run it
+## Motion and animation
 
-No build step or dependencies. Open `index.html` in a browser, or serve the folder:
+The 3D brain scene is designed to feel active while keeping the dashboard readable. The model supports direct orbit and zoom interaction, and auto-rotation can be turned off. The activity field and neural-pathway layer visualize signal movement around the selected brain state. The signal chart and session timeline provide a second, time-based view of activity.
+
+Motion should communicate state or direction, rather than act as decoration. For comfortable use, keep motion subtle, provide a way to pause continuous movement, and respect the operating system's reduced-motion preference.
+
+## About the displayed data
+
+This is a **visualization prototype**, not a brain scanner or medical product. Values displayed in the interface—including state percentages, activity index, connectivity, response latency, signal clarity, confidence, and timeline traces—are illustrative demo values. They are not measurements collected from a person, do not represent validated EEG analysis, and should not be used to make health decisions.
+
+For a real-data version, document the signal source and consent process, electrode layout and units, sampling rate, preprocessing steps, and the exact definition and validation of every derived metric. Keep measured values distinct from simulated or estimated values, and show missing or uncertain data honestly.
+
+## Run locally
+
+The live project is published with GitHub Pages. To run a local checkout, serve the directory containing the site's `index.html` over HTTP; a static file server is sufficient. For example, with Node.js:
 
 ```bash
-python3 -m http.server 8000
-# then visit http://localhost:8000
+npx serve .
 ```
 
-Fonts (Inter, Space Grotesk, IBM Plex Mono) load from Google Fonts. Without a connection the page falls back to system fonts.
+Open the local URL shown by the server. If the 3D scene uses remote model, library, or font assets, an internet connection is also required.
 
-## Deploy with GitHub Pages
+## Credits
 
-1. Push the repo to GitHub.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**, then select `main` and `/ (root)`.
-4. Your site will be live at `https://<your-username>.github.io/neuroverse-brain-explorer/`.
+The 3D anatomical model and its asset license should be credited in the deployed project. If using the Brain Project atlas model, retain attribution to [Brain Project / Z-Anatomy / BodyParts3D](https://github.com/itayinbarr/brainproject#attribution--licence) and comply with its CC BY-SA 4.0 terms, including share-alike requirements for adapted material.
 
-## Tech
+## Project status
 
-- Plain HTML, CSS and JavaScript in one file
-- Canvas 2D with a custom perspective projection, depth shading and bucketed drawing
-- Fonts: Space Grotesk (display), Inter (UI), IBM Plex Mono (numbers)
-
-## Project structure
-
-```text
-neuroverse-brain-explorer/
-├── index.html   # the entire app (markup, styles, script)
-└── README.md
-```
-
-## Customizing
-
-- **Regions and activity values:** edit the `R` array in the script (name, description, 3D position, activity per state)
-- **Brain states:** edit the `SD` object (name, color, text)
-- **UI colors:** edit the CSS variables in `:root`
-- **Brain colors:** edit the `C` constants in the script
-
-## License
-
-MIT. Add a `LICENSE` file if you want to publish under it.
+Neuroverse is a fictional UI/UX competition concept. Interface values and visualized activity are for demonstration only.
