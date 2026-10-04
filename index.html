@@ -200,7 +200,6 @@ const PR=[],PW=[];pts.forEach(p=>{let b=0,bd=9;R.forEach((r,i)=>{const d=Math.hy
 const curves=[];
 for(let k=0;k<13;k++){const c=[];for(let i=0;i<=72;i++){const t=i/72*6.283,y=clamp(-.8+k*.13+.06*Math.sin(t*7+k*1.7),-.98,.98),r=Math.sqrt(1-y*y);c.push(surf(r*Math.cos(t),y,r*Math.sin(t)))}curves.push(c)}
 for(let m=0;m<12;m++){const c=[];for(let j=0;j<=48;j++){const u=-1+2*j/48,s=Math.sqrt(1-u*u),t=m/12*6.283+.09*Math.sin(u*10+m);c.push(surf(s*Math.cos(t),u,s*Math.sin(t)))}curves.push(c)}
-const RG=[{r:1.45,ax:.5,az:.2,s:.35,c:C.vi},{r:1.7,ax:-.7,az:.6,s:-.25,c:C.cy},{r:1.25,ax:1.1,az:-.4,s:.5,c:C.mi}];
 const rp=()=>{for(;;){const p=[(rand()*2-1)*.8,(rand()*2-1)*.55,(rand()*2-1)];if(p[0]*p[0]/.5+p[1]*p[1]/.3+p[2]*p[2]<.6)return p}};
 const fil=[];for(let i=0;i<110;i++){const a=rp(),b=rp();fil.push({a,b,c:[(a[0]+b[0])*.3,(a[1]+b[1])*.3,(a[2]+b[2])*.3]})}
 const pth=PAIRS.map(([i,j])=>{const a=R[i].p,b=R[j].p;return{i,j,a,b,c:[(a[0]+b[0])*.3,(a[1]+b[1])*.3+.1,(a[2]+b[2])*.3]}});
@@ -219,15 +218,12 @@ const bez=(f,s)=>{const u=1-s;return[0,1,2].map(k=>u*u*f.a[k]+2*u*s*f.c[k]+s*s*f
 function vps(){if(mode==='compare'){const sc=Math.min(W*.15,H*.3)*cam.zoom;return[{cx:W*.25,cy:H*.54,sc,act:actCur},{cx:W*.75,cy:H*.54,sc,act:savedAct}]}return[{cx:W/2,cy:H*.54,sc:Math.min(W*.26,H*.33)*cam.zoom,act:actCur,main:1}]}
 const hue=val=>val>=62?C.co:val>=36?C.cy:(state===2?C.mi:C.vi);
 const Rn=n=>{const X=n[0]*TR.cy+n[2]*TR.sy,Z=-n[0]*TR.sy+n[2]*TR.cy;return[X,n[1]*TR.cp-Z*TR.sp,n[1]*TR.sp+Z*TR.cp]};
-function ringPt(g,a){const x=Math.cos(g.r?a:0)*g.r,z=Math.sin(a)*g.r;const y1=-z*Math.sin(g.ax),z1=z*Math.cos(g.ax);return[x*Math.cos(g.az)-y1*Math.sin(g.az),x*Math.sin(g.az)+y1*Math.cos(g.az),z1]}
-function rings(v,t,front){RG.forEach(g=>{ctx.lineWidth=front?1.3:1;ctx.strokeStyle=rgba(g.c,front?.4:.14);ctx.beginPath();let pen=false;for(let i=0;i<=72;i++){const q=P(ringPt(g,i/72*6.283),v);if((q[2]>=0)===front){pen?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);pen=true}else pen=false}ctx.stroke();const q=P(ringPt(g,t*g.s),v);if((q[2]>=0)===front){ctx.fillStyle=rgba(g.c,.18);ctx.beginPath();ctx.arc(q[0],q[1],10,0,7);ctx.fill();ctx.fillStyle=g.c;ctx.beginPath();ctx.arc(q[0],q[1],front?3.2:2,0,7);ctx.fill()}})}
 function drawBrain(v,t){
 const {cx,cy,sc,act}=v,col=SD[ST[state]].col,sig=mode==='signals';
 ctx.lineWidth=1;ctx.strokeStyle='rgba(133,145,165,.09)';
 const fq=P([0,-1.05,0],v);ctx.save();ctx.translate(fq[0],fq[1]);ctx.scale(1,.28);let sg=ctx.createRadialGradient(0,0,0,0,0,sc*1.15);sg.addColorStop(0,'rgba(0,0,0,.55)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(0,0,sc*1.15,0,7);ctx.fill();ctx.restore();
 [1.1,1.5,1.9].forEach(k=>{ctx.beginPath();for(let i=0;i<=64;i++){const a=i/64*6.283,q=P([Math.cos(a)*k,-1.05,Math.sin(a)*k],v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke()});
 ctx.beginPath();for(let i=0;i<16;i++){const a=i/16*6.283,p=P([Math.cos(a)*.6,-1.05,Math.sin(a)*.6],v),q=P([Math.cos(a)*1.9,-1.05,Math.sin(a)*1.9],v);ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1])}ctx.stroke();
-rings(v,t,false);
 let g=ctx.createRadialGradient(cx,cy,sc*.1,cx,cy,sc*1.05);g.addColorStop(0,rgba(col,.11));g.addColorStop(1,rgba(col,0));ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,cy,sc*1.05,sc*.8,0,0,7);ctx.fill();
 if(L.paths){const am=sig?2:1;ctx.lineWidth=1;fil.forEach(f=>{ctx.strokeStyle=rgba(col,.07*am);ctx.beginPath();for(let i=0;i<=10;i++){const q=P(bez(f,i/10),v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke()});
 pth.forEach((f,k)=>{const e=(act[f.i]+act[f.j])/200;ctx.strokeStyle=rgba(C.cy,(.1+e*.35)*(sig?1.5:1));ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=14;i++){const q=P(bez(f,i/14),v);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.stroke();const q=P(bez(f,(t*.18+k*.37)%1),v);ctx.fillStyle=rgba('#ffffff',.5+e*.4);ctx.beginPath();ctx.arc(q[0],q[1],1.8,0,7);ctx.fill()})}
@@ -244,7 +240,6 @@ ctx.globalCompositeOperation='lighter';for(let i=0;i<46;i++){const q=P(fil[i].a,
 R.forEach((r,i)=>{const q=Q[i],vis=q[2]>-.3?1:.3;if(L.limbic&&i>=6&&i<=10){ctx.fillStyle=rgba(C.mi,.85*vis);ctx.beginPath();ctx.arc(q[0],q[1],2.6,0,7);ctx.fill()}
 ctx.strokeStyle=`rgba(255,255,255,${(i===sel?.9:.3)*vis})`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(q[0],q[1],i===sel?7:4,0,7);ctx.stroke();
 if(mode==='compare'){const d=actCur[i]-savedAct[i];if(Math.abs(d)>=18){ctx.strokeStyle=d>0?C.co:C.mi;ctx.lineWidth=2;ctx.beginPath();ctx.arc(q[0],q[1],sc*.13,0,7);ctx.stroke()}}});
-rings(v,t,true);
 if(v.main&&mode==='explore'&&W>=760){const list=[2,6,7];if(!list.includes(sel))list.push(sel);const slots=[[24,.3,1],[W-24,.5,-1],[24,.7,1],[W-24,.28,-1]];
 list.forEach((i,k)=>{const r=R[i],val=act[i],s=slots[k],q=Q[i],on=i===sel;const tag=r.tag||r.f.split(' · ')[0].toUpperCase();const stat=val>=60?'+'+Math.round(val-60)+'% ACTIVITY':val>=35?'STABLE':'LOW';
 ctx.font='600 11px "DM Sans"';ctx.letterSpacing='1px';const w=Math.max(ctx.measureText(r.n.toUpperCase()).width,ctx.measureText(tag).width,ctx.measureText(stat).width)+10;
@@ -254,7 +249,7 @@ return Q}
 let lastQ=[];
 function draw(t){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);const tt=RM?0:t;lastQ=vps().map(v=>({v,q:drawBrain(v,tt)}));
 if(mode==='compare'){ctx.strokeStyle='#263142';ctx.beginPath();ctx.moveTo(W/2,70);ctx.lineTo(W/2,H-50);ctx.stroke();ctx.fillStyle='#8591A5';ctx.font='11px "DM Sans"';ctx.textAlign='center';ctx.fillText('Rings mark regions that differ by 18+ points: coral is higher now, mint is lower now.',W/2,H-24);ctx.textAlign='left'}
-if(mode!=='compare'){const ox=W-58,oy=H-58;ctx.font='500 10px \"IBM Plex Mono\"';[[1,0,0,'X',C.co],[0,1,0,'Y',C.mi],[0,0,1,'Z',C.cy]].forEach(a=>{const r=Rn(a);ctx.strokeStyle=rgba(a[4],.8);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+r[0]*24,oy-r[1]*24);ctx.stroke();ctx.fillStyle=rgba(a[4],.9);ctx.fillText(a[3],ox+r[0]*31-3,oy-r[1]*31+3)})}
+if(mode!=='compare'){const ox=W-58,oy=H-58;ctx.font='500 10px "IBM Plex Mono"';[[1,0,0,'X',C.co],[0,1,0,'Y',C.mi],[0,0,1,'Z',C.cy]].forEach(a=>{const r=Rn(a);ctx.strokeStyle=rgba(a[4],.8);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+r[0]*24,oy-r[1]*24);ctx.stroke();ctx.fillStyle=rgba(a[4],.9);ctx.fillText(a[3],ox+r[0]*31-3,oy-r[1]*31+3)})}
 if(hover>=0){const o=lastQ[0];const q=(mode==='compare'?lastQ[hv]:o).q[hover];const nm=R[hover].n;ctx.font='500 12px "DM Sans"';const w=ctx.measureText(nm).width+20;ctx.fillStyle='rgba(21,29,42,.95)';ctx.beginPath();ctx.roundRect(q[0]+12,q[1]-34,w,24,12);ctx.fill();ctx.fillStyle='#F4F7FB';ctx.fillText(nm,q[0]+22,q[1]-18)}}
 let hv=0;
 function hit(x,y){let best=-1,bd=18;lastQ.forEach((o,k)=>o.q.forEach((q,i)=>{const d=Math.hypot(q[0]-x,q[1]-y);if(d<bd&&q[2]>-.35){bd=d;best=i;hv=k}}));return best}
